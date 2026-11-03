@@ -21,6 +21,13 @@
     return "other";
   };
   const mime = name => ({ png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", gif: "image/gif", webp: "image/webp", svg: "image/svg+xml", bmp: "image/bmp", pdf: "application/pdf" }[ext(name)] || "application/octet-stream");
+  const OPEN_WITH = window.SCOUTHUB_OPEN_WITH || {}, APPS = window.SCOUTHUB_APPS || [];
+  const appsFor = name => (OPEN_WITH[ext(name)] || []).map(n => APPS.find(a => a.name === n)).filter(Boolean);
+  const previewable = name => kind(name) !== "other";
+  function openWith(app, name) {
+    const u = new URL(app.url, location.href); u.searchParams.set("scoutcloud", path(name));
+    window.open(u.href, "_blank", "noopener");
+  }
   const icon = e => e.type === "dir" ? "📁" : ({ image: "🖼️", pdf: "📕", text: "📄", other: "📦" })[kind(e.name)];
 
   async function call(action, data = {}) {
@@ -67,14 +74,36 @@
       const btn = (label, fn, cls = "") => { const b = Object.assign(document.createElement("button"), { type: "button", textContent: label, className: cls }); b.onclick = fn; acts.append(b); };
       if (e.type === "dir") name.onclick = () => { cwd.push(e.name); $("c-search").value = ""; list(); };
       else {
-        name.onclick = () => view(e);
-        btn("Ouvrir", () => view(e)); btn("Télécharger", () => download(e.name)); btn("Renommer", () => rename(e.name));
+        const def = appsFor(e.name)[0];
+        name.onclick = () => def ? openWith(def, e.name) : previewable(e.name) ? view(e) : download(e.name);
+        name.title = def ? "Ouvrir avec " + def.name : "";
+        openMenu(acts, e);
+        if (previewable(e.name)) btn("Aperçu", () => view(e));
+        btn("Télécharger", () => download(e.name)); btn("Renommer", () => rename(e.name));
         btn("Supprimer", async () => { if (!confirm(`Supprimer « ${e.name} » ?`)) return;
           try { await call("remove", { path: path(e.name) }); list(); } catch (x) { say($("c-status"), x.message, true); } }, "del");
       }
       li.append(ic, name, meta, acts); ul.append(li);
     });
   }
+
+  // Menu « Ouvrir avec » : applications compatibles d'abord, puis toutes les autres.
+  function openMenu(acts, e) {
+    const wrap = document.createElement("span"); wrap.className = "menu-wrap";
+    const b = Object.assign(document.createElement("button"), { type: "button", textContent: "Ouvrir avec ▾", className: "primary-sm" });
+    const menu = document.createElement("div"); menu.className = "menu"; menu.hidden = true; menu.setAttribute("role", "menu");
+    const good = appsFor(e.name), rest = APPS.filter(a => !good.includes(a) && a.name !== "ScoutCloud");
+    const add = (a, dim) => {
+      const it = Object.assign(document.createElement("button"), { type: "button", className: "menu-item" + (dim ? " dim" : "") }); it.setAttribute("role", "menuitem");
+      it.append(Object.assign(document.createElement("img"), { src: "../ScoutHub/" + a.icon, alt: "", width: 20, height: 20 }), document.createTextNode(a.name));
+      it.onclick = () => { menu.hidden = true; openWith(a, e.name); }; menu.append(it);
+    };
+    if (good.length) { menu.append(Object.assign(document.createElement("p"), { className: "menu-h", textContent: "Applications compatibles" })); good.forEach(a => add(a, false)); }
+    menu.append(Object.assign(document.createElement("p"), { className: "menu-h", textContent: good.length ? "Autres applications" : "Choisir une application" })); rest.forEach(a => add(a, true));
+    b.onclick = ev => { ev.stopPropagation(); document.querySelectorAll(".menu").forEach(m => { if (m !== menu) m.hidden = true; }); menu.hidden = !menu.hidden; };
+    wrap.append(b, menu); acts.append(wrap);
+  }
+  document.addEventListener("click", () => document.querySelectorAll(".menu").forEach(m => m.hidden = true));
 
   function saveAs(name, bytes) {
     const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([bytes])); a.download = name; a.click();
