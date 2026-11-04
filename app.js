@@ -39,7 +39,7 @@
     if (!out.ok) { if (/Session expirée/.test(out.error)) toLogin(); throw new Error(out.error || "Erreur."); }
     return out;
   }
-  const put = (p, bytes) => call("put", { path: p, base64: b64(bytes) });
+  const put = (p, bytes) => { cacheDrop(); return call("put", { path: p, base64: b64(bytes) }).finally(cacheDrop); };
   const get = async p => unb64((await call("get", { path: p })).base64);
 
   function crumbs() {
@@ -52,13 +52,24 @@
     cwd.forEach((p, i) => { nav.append(" / "); add(p, i + 1); });
   }
 
+  // Liste mémorisée (partagée avec ScoutHub) : affichage immédiat, puis mise à jour depuis le serveur.
+  const LS = "scouthub.ls:";
+  const cacheGet = p => { try { return JSON.parse(localStorage.getItem(LS + p) || "null"); } catch { return null; } };
+  const cachePut = (p, entries) => { try { localStorage.setItem(LS + p, JSON.stringify(entries)); } catch {} };
+  const cacheDrop = () => { try { Object.keys(localStorage).filter(k => k.startsWith(LS)).forEach(k => localStorage.removeItem(k)); } catch {} };
+  const sortRows = entries => entries.filter(e => e.name !== ".gitkeep").sort((a, b) => a.type === b.type ? a.name.localeCompare(b.name, "fr") : a.type === "dir" ? -1 : 1);
+  let listSeq = 0;
   async function list() {
-    crumbs(); say($("c-status"), "Chargement…"); $("c-list").textContent = "";
+    const seq = ++listSeq, p = path(), cached = cacheGet(p);
+    crumbs(); $("c-list").textContent = "";
+    if (cached) { rows = sortRows(cached); render(); say($("c-status"), `${rows.length} élément(s) · actualisation…`); }
+    else say($("c-status"), "Chargement…");
     try {
-      const { entries } = await call("list", { path: path() });
-      rows = entries.filter(e => e.name !== ".gitkeep").sort((a, b) => a.type === b.type ? a.name.localeCompare(b.name, "fr") : a.type === "dir" ? -1 : 1);
-      render();
-    } catch (e) { say($("c-status"), e.message, true); }
+      const { entries } = await call("list", { path: p });
+      cachePut(p, entries);
+      if (seq !== listSeq) return;           // l'utilisateur a changé de dossier entre-temps
+      rows = sortRows(entries); render();
+    } catch (e) { if (seq === listSeq) say($("c-status"), e.message, true); }
   }
 
   function render() {
@@ -81,7 +92,7 @@
         if (previewable(e.name)) btn("Aperçu", () => view(e));
         btn("Télécharger", () => download(e.name)); btn("Renommer", () => rename(e.name));
         btn("Supprimer", async () => { if (!confirm(`Supprimer « ${e.name} » ?`)) return;
-          try { await call("remove", { path: path(e.name) }); list(); } catch (x) { say($("c-status"), x.message, true); } }, "del");
+          try { cacheDrop(); await call("remove", { path: path(e.name) }); cacheDrop(); list(); } catch (x) { say($("c-status"), x.message, true); } }, "del");
       }
       li.append(ic, name, meta, acts); ul.append(li);
     });
@@ -116,7 +127,7 @@
   async function rename(name) {
     const n = (prompt("Nouveau nom :", name) || "").trim();
     if (!n || n === name) return;
-    try { say($("c-status"), "Renommage…"); const bytes = await get(path(name)); await put(path(n), bytes); await call("remove", { path: path(name) }); list(); }
+    try { say($("c-status"), "Renommage…"); const bytes = await get(path(name)); await put(path(n), bytes); await call("remove", { path: path(name) }); cacheDrop(); list(); }
     catch (e) { say($("c-status"), e.message, true); }
   }
 
@@ -175,8 +186,10 @@
   if (!getToken()) toLogin();
   else {
     $("cloud").hidden = false;
-    call("me").then(o => { $("who").textContent = o.user.email; list(); }).catch(e => say($("c-status"), e.message, true));
     const dir = new URLSearchParams(location.search).get("dossier");
     if (dir) cwd = dir.split("/").filter(Boolean);
+    try { const u = JSON.parse(localStorage.getItem("scouthub.user") || "null"); if (u) $("who").textContent = u.email; } catch {}
+    list();                                   // la liste valide elle-même la session : plus d'appel « me » préalable
+    call("me").then(o => { $("who").textContent = o.user.email; }).catch(() => {});
   }
 })();
