@@ -25,7 +25,7 @@ jobs:
       - uses: actions/configure-pages@v5
       - run: |
           mkdir build
-          cp -a index.html app.js styles.css cloud.css assets build/
+          cp -a index.html styles.css cloud.css assets build/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: build
