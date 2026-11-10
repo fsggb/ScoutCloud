@@ -3,53 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="ScoutCloud : vos fichiers FSGGB, stockés dans GitHub.">
+  <meta http-equiv="refresh" content="8; url=../ScoutHub/">
   <title>ScoutCloud</title>
   <link rel="icon" type="image/png" href="assets/fsggb.png">
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="cloud.css">
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="../ScoutHub/" aria-label="Retour à ScoutHub"><img class="brand-logo" src="assets/fsggb.png" alt="FSGGB" width="40" height="40"><strong>ScoutCloud</strong></a>
-    <nav class="topnav">
-      <span id="who" class="who"></span>
-      <a class="nav-btn" href="../ScoutHub/">← ScoutHub</a>
-    </nav>
-  </header>
-
+  <header class="topbar"><a class="brand" href="../ScoutHub/"><img class="brand-logo" src="assets/fsggb.png" alt="FSGGB" width="40" height="40"><strong>ScoutCloud</strong></a></header>
   <main class="shell">
-    <section class="panel" id="cloud" aria-labelledby="cloud-title" hidden>
-      <div class="panel-head">
-        <div><p class="label">Espace personnel</p><h1 id="cloud-title">Mes fichiers</h1></div>
-        <div class="actions">
-          <input id="c-search" type="search" placeholder="Filtrer…" aria-label="Filtrer les fichiers">
-          <button id="c-up" class="ghost" type="button">Importer</button>
-          <button id="c-newfolder" class="ghost" type="button">Nouveau dossier</button>
-          <button id="c-newfile" class="ghost" type="button">Nouveau fichier texte</button>
-          <button id="c-refresh" class="ghost" type="button">Actualiser</button>
-          <input id="c-input" type="file" multiple hidden>
-        </div>
-      </div>
-      <nav id="crumbs" class="crumbs" aria-label="Chemin"></nav>
-      <p id="c-status" class="status" role="status"></p>
-      <ul id="c-list" class="file-list cloud-list"></ul>
-      <div id="drop" class="drop" hidden>Déposez vos fichiers ici</div>
-    </section>
-
-    <dialog id="dlg-view" class="wide">
-      <h2 id="view-title"></h2>
-      <div id="view-body" class="view-body"></div>
-      <p id="view-status" class="status" role="status"></p>
-      <div class="dlg-actions">
-        <button class="ghost" type="button" id="view-dl">Télécharger</button>
-        <button class="primary" type="button" id="view-save" hidden>Enregistrer</button>
-        <button class="ghost" type="button" data-close>Fermer</button>
-      </div>
-    </dialog>
+    <h1>ScoutCloud est fermé</h1>
+    <p>Le stockage de fichiers dans GitHub a été supprimé. Les applications FSGGB enregistrent et ouvrent vos fichiers directement sur votre ordinateur.</p>
+    <p><a href="../ScoutHub/">Retour à ScoutHub</a> (redirection automatique dans quelques secondes).</p>
   </main>
-  <footer>ScoutCloud · FSGGB · <a href="https://github.com/fsggb/ScoutCloud">Code source</a></footer>
-  <script src="../ScoutHub/config.js"></script>
-  <script src="app.js"></script>
 </body>
 </html>
