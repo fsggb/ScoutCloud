@@ -3,17 +3,43 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="refresh" content="8; url=../ScoutHub/">
+  <meta name="description" content="ScoutCloud : vos fichiers FSGGB, dans votre Google Drive (bientôt).">
   <title>ScoutCloud</title>
   <link rel="icon" type="image/png" href="assets/fsggb.png">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="cloud.css">
 </head>
 <body>
-  <header class="topbar"><a class="brand" href="../ScoutHub/"><img class="brand-logo" src="assets/fsggb.png" alt="FSGGB" width="40" height="40"><strong>ScoutCloud</strong></a></header>
+  <header class="topbar">
+    <a class="brand" href="../ScoutHub/" aria-label="Retour à ScoutHub"><img class="brand-logo" src="assets/fsggb.png" alt="FSGGB" width="40" height="40"><strong>ScoutCloud</strong></a>
+    <nav class="topnav"><a class="nav-btn" href="../ScoutHub/">← ScoutHub</a></nav>
+  </header>
+
   <main class="shell">
-    <h1>ScoutCloud est fermé</h1>
-    <p>Le stockage de fichiers dans GitHub a été supprimé. Les applications FSGGB enregistrent et ouvrent vos fichiers directement sur votre ordinateur.</p>
-    <p><a href="../ScoutHub/">Retour à ScoutHub</a> (redirection automatique dans quelques secondes).</p>
+    <div class="soon-banner" role="status">
+      <strong>Bientôt disponible.</strong>
+      ScoutCloud rangera vos fichiers dans <b>votre propre Google Drive</b> : il faudra un compte Google pour s’y connecter. Pour l’instant, la connexion n’est pas encore ouverte : voici l’affichage prévu, sans fichier.
+    </div>
+
+    <section class="panel preview" id="cloud" aria-labelledby="cloud-title">
+      <div class="panel-head">
+        <div><p class="label">Espace personnel</p><h1 id="cloud-title">Mes fichiers</h1></div>
+        <div class="actions">
+          <input type="search" placeholder="Filtrer…" aria-label="Filtrer les fichiers" disabled>
+          <button class="ghost" type="button" disabled>Importer</button>
+          <button class="ghost" type="button" disabled>Nouveau dossier</button>
+          <button class="ghost" type="button" disabled>Actualiser</button>
+        </div>
+      </div>
+      <nav class="crumbs" aria-label="Chemin"><button type="button" disabled>Mon Drive</button> / <span>ScoutCloud</span></nav>
+      <div class="empty-state">
+        <div class="g-lock" aria-hidden="true">🔒</div>
+        <h2>Connexion Google requise</h2>
+        <p>Vos fichiers apparaîtront ici dès que la connexion avec Google sera ouverte. Ils resteront dans votre Drive : vous gardez la main dessus.</p>
+        <button class="primary fit" type="button" disabled>Continuer avec Google (bientôt)</button>
+      </div>
+    </section>
   </main>
+  <footer>ScoutCloud · FSGGB · <a href="https://github.com/fsggb/ScoutCloud">Code source</a></footer>
 </body>
 </html>
